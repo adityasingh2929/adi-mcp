@@ -1,0 +1,22 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./shared" },
+    { "path": "./packages/core" },
+    { "path": "./packages/auth" },
+    { "path": "./packages/github" },
+    { "path": "./packages/x" },
+    { "path": "./packages/linkedin" },
+    { "path": "./packages/gmail" },
+    { "path": "./packages/calendar" },
+    { "path": "./packages/notion" },
+    { "path": "./packages/obsidian" },
+    { "path": "./packages/postgres" },
+    { "path": "./packages/supabase" },
+    { "path": "./packages/stripe" },
+    { "path": "./packages/resend" },
+    { "path": "./packages/filesystem" },
+    { "path": "./packages/browser" },
+    { "path": "./apps/server" }
+  ]
+}

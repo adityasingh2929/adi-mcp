@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["node"],
+    "allowJs": true
+  },
+  "include": [
+    "eslint.config.js",
+    "vitest.config.ts",
+    "vitest.shared.ts",
+    "scripts/**/*.ts",
+    "packages/*/vitest.config.ts",
+    "apps/*/vitest.config.ts"
+  ]
+}
