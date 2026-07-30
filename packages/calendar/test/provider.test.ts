@@ -1,8 +1,19 @@
 import { describe, expect, it } from 'vitest';
 import { InMemoryKvStore, NotImplementedError, createLogger } from '@adi-mcp/core';
 import type { ExecutionContext } from '@adi-mcp/core';
+import { CredentialStore } from '@adi-mcp/auth';
 import type { Env } from '@adi-mcp/shared';
-import { calendarProvider } from '../src/index.js';
+import {
+  calendarProvider,
+  buildCalendarOAuthConfig,
+  createCalendarCredentialProvider,
+} from '../src/index.js';
+
+const TEST_ENV = {
+  GOOGLE_CALENDAR_CLIENT_ID: 'calendar-client',
+  GOOGLE_CALENDAR_CLIENT_SECRET: 'calendar-secret',
+  GOOGLE_CALENDAR_REDIRECT_URI: 'https://worker.test/providers/calendar/callback',
+} as Env;
 
 const ctx: ExecutionContext = {
   userId: 'user-1',
@@ -83,5 +94,50 @@ describe('calendar_create_event schema', () => {
     expect(
       createEvent.inputSchema.safeParse({ ...valid, attendees: ['not-an-email'] }).success,
     ).toBe(false);
+  });
+});
+
+describe('Calendar OAuth configuration', () => {
+  it('targets Google endpoints with PKCE and offline access', () => {
+    const config = buildCalendarOAuthConfig(TEST_ENV);
+    expect(config.authorizationEndpoint).toBe('https://accounts.google.com/o/oauth2/v2/auth');
+    expect(config.usePkce).toBe(true);
+    expect(config.tokenAuthMethod).toBe('body');
+    expect(config.extraAuthorizationParams).toEqual({
+      access_type: 'offline',
+      prompt: 'consent',
+    });
+  });
+
+  it('prefers its own client credentials over the shared Google app', () => {
+    const config = buildCalendarOAuthConfig({
+      ...TEST_ENV,
+      GOOGLE_CLIENT_ID: 'gmail-client',
+      GOOGLE_CLIENT_SECRET: 'gmail-secret',
+    });
+    expect(config.clientId).toBe('calendar-client');
+    expect(config.clientSecret).toBe('calendar-secret');
+  });
+
+  it('falls back to the shared Google app when calendar-specific ones are unset', () => {
+    const config = buildCalendarOAuthConfig({
+      GOOGLE_CLIENT_ID: 'gmail-client',
+      GOOGLE_CLIENT_SECRET: 'gmail-secret',
+    } as Env);
+    expect(config.clientId).toBe('gmail-client');
+    expect(config.clientSecret).toBe('gmail-secret');
+  });
+
+  it('omits the client secret when neither app is configured', () => {
+    expect(buildCalendarOAuthConfig({} as Env).clientSecret).toBeUndefined();
+  });
+
+  it('produces a credential provider bound to the calendar id', () => {
+    const provider = createCalendarCredentialProvider(
+      TEST_ENV,
+      new CredentialStore(new InMemoryKvStore()),
+    );
+    expect(provider.providerId).toBe('calendar');
+    expect(provider.kind).toBe('oauth2');
   });
 });

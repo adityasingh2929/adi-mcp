@@ -169,7 +169,7 @@ runtime.
 
 ## Testing strategy
 
-281 tests, no network access, three tiers:
+294 tests, no network access, three tiers:
 
 - **Unit** (`core`, `auth`) — pure logic against `InMemoryKvStore`. Includes real crypto:
   AES-GCM round-trips, PKCE derivation, timing-safe comparison.

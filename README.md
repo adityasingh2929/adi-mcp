@@ -97,7 +97,7 @@ Provider credentials are separate from that token — connect each service once 
 
 ```bash
 pnpm dev              # wrangler dev on :8787
-pnpm test             # all 281 tests
+pnpm test             # all 294 tests
 pnpm test:coverage    # with coverage report
 pnpm typecheck        # tsc across every package
 pnpm lint             # eslint, type-aware
