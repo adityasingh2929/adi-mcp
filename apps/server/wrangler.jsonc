@@ -12,13 +12,13 @@
   // Bind a KV namespace for credential storage, rate limiting, and (if enabled)
   // the OAuth 2.1 authorization-server flow.
   // Create it with: wrangler kv namespace create ADI_MCP_KV
-  "kv_namespaces": [
-    {
-      "binding": "ADI_MCP_KV",
-      "id": "REPLACE_WITH_KV_NAMESPACE_ID",
-      "preview_id": "REPLACE_WITH_PREVIEW_KV_NAMESPACE_ID",
-    },
-  ],
+"kv_namespaces": [
+  {
+    "binding": "ADI_MCP_KV",
+    "id": "cb5a87539ebb4655adc39cf6f25aa4dd",
+    "preview_id": "eb66d4a721214890bb073b12a26e056d"
+  }
+],
 
   // Non-secret configuration. Secrets (tokens, client secrets, API keys) are set
   // with `wrangler secret put <NAME>` and must never be committed here.
