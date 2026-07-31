@@ -326,6 +326,41 @@ describe('OAuth2CredentialProvider.getCredential', () => {
   });
 });
 
+describe('OAuth2CredentialProvider default fetch binding', () => {
+  /**
+   * workerd's global `fetch` refuses to run with a receiver other than the global scope.
+   * Node's does not, so the deployed-only failure is reproduced here by emulating the check.
+   */
+  function workerdStyleFetch(): typeof fetch {
+    return function (this: unknown) {
+      if (this !== undefined && this !== globalThis) {
+        throw new TypeError("Illegal invocation: function called with incorrect 'this' reference.");
+      }
+      return Promise.resolve(jsonResponse({ access_token: 'access-abc', expires_in: 7200 }));
+    };
+  }
+
+  it('exchanges the code without an Illegal invocation when no fetchImpl is injected', async () => {
+    const kv = new InMemoryKvStore();
+    const store = new CredentialStore(kv);
+    const original = globalThis.fetch;
+    globalThis.fetch = workerdStyleFetch();
+
+    try {
+      const provider = new OAuth2CredentialProvider(config, store);
+      const ctx = makeContext(kv);
+      const url = new URL(await provider.buildAuthorizationUrl(ctx));
+
+      const state = url.searchParams.get('state')!;
+      const credential = await provider.handleCallback('auth-code', state, ctx);
+
+      expect(credential.accessToken).toBe('access-abc');
+    } finally {
+      globalThis.fetch = original;
+    }
+  });
+});
+
 describe('OAuth2CredentialProvider connection lifecycle', () => {
   it('isConnected reflects stored state', async () => {
     const kv = new InMemoryKvStore();

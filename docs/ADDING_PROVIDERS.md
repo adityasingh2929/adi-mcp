@@ -99,7 +99,7 @@ translate errors. Model it on `packages/x/src/client.ts`. The parts that matter:
 export class LinearClient {
   constructor(
     private readonly ctx: ExecutionContext,
-    private readonly fetchImpl: typeof fetch = fetch,
+    private readonly fetchImpl: typeof fetch = globalFetch,
   ) {}
 
   async request<TResponse>(query: string): Promise<TResponse> {
@@ -117,8 +117,12 @@ export class LinearClient {
 
 Three conventions, each earning its keep:
 
-- **`fetchImpl` is injected**, defaulting to global `fetch`. That is the entire test strategy
-  for provider packages — no network, no interceptors, no nock.
+- **`fetchImpl` is injected**, defaulting to `globalFetch` from `@adi-mcp/core`. That is the
+  entire test strategy for provider packages — no network, no interceptors, no nock. Default
+  it to `globalFetch`, never to a bare `fetch`: workerd binds the global `fetch` to the global
+  scope, so a bare reference stored in a field and later called as `this.fetchImpl(...)` throws
+  `Illegal invocation: function called with incorrect 'this' reference.` once deployed. Node's
+  `fetch` ignores its receiver, so the tests will not catch it for you.
 - **Refresh is not your problem.** `getCredential` transparently refreshes an expired token
   and re-persists it. Throw nothing, catch nothing.
 - **Translate errors into the core hierarchy.** A 429 becomes `RateLimitError` (read the

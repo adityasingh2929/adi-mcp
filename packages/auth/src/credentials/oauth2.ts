@@ -1,5 +1,5 @@
 import { KV_KEY_PREFIXES } from '@adi-mcp/shared';
-import { AuthRequiredError, UpstreamApiError } from '@adi-mcp/core';
+import { AuthRequiredError, UpstreamApiError, globalFetch } from '@adi-mcp/core';
 import type { CredentialStore } from '../credential-store.js';
 import { deriveCodeChallenge, generateCodeVerifier, generateState } from '../crypto.js';
 import type { CredentialContext, CredentialProvider, ProviderCredential } from '../types.js';
@@ -55,7 +55,7 @@ export class OAuth2CredentialProvider implements CredentialProvider {
   constructor(
     private readonly config: OAuth2Config,
     private readonly store: CredentialStore,
-    private readonly fetchImpl: typeof fetch = fetch,
+    private readonly fetchImpl: typeof fetch = globalFetch,
     private readonly now: () => number = () => Date.now(),
   ) {}
 

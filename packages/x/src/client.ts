@@ -1,4 +1,9 @@
-import { RateLimitError, UpstreamApiError, type ExecutionContext } from '@adi-mcp/core';
+import {
+  RateLimitError,
+  UpstreamApiError,
+  globalFetch,
+  type ExecutionContext,
+} from '@adi-mcp/core';
 import { CredentialStore } from '@adi-mcp/auth';
 import { X_API_BASE_URL, X_PROVIDER_ID, createXCredentialProvider } from './config.js';
 
@@ -22,7 +27,7 @@ export interface XRequestOptions {
 export class XClient {
   constructor(
     private readonly ctx: ExecutionContext,
-    private readonly fetchImpl: typeof fetch = fetch,
+    private readonly fetchImpl: typeof fetch = globalFetch,
   ) {}
 
   async request<TResponse>(path: string, options: XRequestOptions = {}): Promise<TResponse> {

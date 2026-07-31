@@ -32,6 +32,8 @@ export {
 
 export { createLogger, type Logger, type LogLevel, type CreateLoggerOptions } from './logger.js';
 
+export { globalFetch } from './fetch.js';
+
 export { CloudflareKvStore, InMemoryKvStore, type KvStore, type KvPutOptions } from './kv-store.js';
 
 export { RateLimiter, type RateLimiterOptions, type RateLimitResult } from './rate-limit.js';
