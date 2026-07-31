@@ -16,6 +16,18 @@ export type {
 export { BearerTokenAuthStrategy } from './strategies/bearer.js';
 export { OAuthAuthStrategy, accessTokenKey, type StoredAccessToken } from './strategies/oauth.js';
 
+export {
+  AuthorizationServer,
+  OAuthError,
+  SUPPORTED_SCOPES,
+  SUPPORTED_GRANT_TYPES,
+  SUPPORTED_RESPONSE_TYPES,
+  SUPPORTED_CODE_CHALLENGE_METHODS,
+  type AuthorizationRequest,
+  type RegisteredClient,
+  type TokenGrant,
+} from './authorization-server.js';
+
 export { CredentialStore } from './credential-store.js';
 export { StaticCredentialProvider } from './credentials/static.js';
 export { OAuth2CredentialProvider, type OAuth2Config } from './credentials/oauth2.js';
@@ -27,6 +39,8 @@ export {
   generateCodeVerifier,
   deriveCodeChallenge,
   generateState,
+  generateToken,
+  sha256Hex,
 } from './crypto.js';
 
 /** Picks the server-level auth strategy from `Env.AUTH_STRATEGY`, defaulting to bearer. */

@@ -198,6 +198,29 @@ The server publishes `/.well-known/oauth-protected-resource` (RFC 9728), and eve
 a `WWW-Authenticate` header pointing at it, so clients that implement MCP authorization can
 discover the scheme on their own.
 
+### Clients that sign in instead of taking a token
+
+Claude Desktop does not accept a pasted bearer token — it discovers the authorization server,
+registers itself, and runs an OAuth flow. For that, flip the strategy in `wrangler.jsonc`:
+
+```jsonc
+"vars": { "AUTH_STRATEGY": "oauth2" }
+```
+
+Then redeploy. This changes how `/mcp` authenticates: the static `MCP_BEARER_TOKEN` stops
+being accepted as an API token, and any existing client configured with it must be switched
+over to the OAuth flow. The secret is still required — it becomes the passphrase that proves
+you own the server on the consent screen, so keep it set.
+
+Verify discovery before pointing a client at it:
+
+```bash
+curl https://<your-worker>.workers.dev/.well-known/oauth-authorization-server
+```
+
+That must return a JSON document whose `issuer` is exactly `https://<your-worker>.workers.dev`.
+A 404 means `AUTH_STRATEGY` is still `bearer`. See [OAUTH.md](OAUTH.md) for the full flow.
+
 Then connect each provider once by visiting `https://<your-worker>.workers.dev/providers/<id>/connect`
 in a browser.
 

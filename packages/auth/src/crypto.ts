@@ -76,6 +76,23 @@ export function generateState(): string {
   return toBase64Url(crypto.getRandomValues(new Uint8Array(24)));
 }
 
+/**
+ * Cryptographically random, URL-safe opaque token (256 bits) for access tokens, refresh
+ * tokens, authorization codes, and client ids.
+ */
+export function generateToken(): string {
+  return toBase64Url(crypto.getRandomValues(new Uint8Array(32)));
+}
+
+/**
+ * Hex-encoded SHA-256. Tokens and authorization codes are stored under their hash so a KV
+ * dump alone cannot be replayed against the server.
+ */
+export async function sha256Hex(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
 function toBase64Url(bytes: Uint8Array): string {
   return toBase64(bytes).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }

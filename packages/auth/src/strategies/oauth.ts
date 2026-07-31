@@ -1,5 +1,6 @@
 import type { Env } from '@adi-mcp/shared';
 import type { KvStore } from '@adi-mcp/core';
+import { sha256Hex } from '../crypto.js';
 import type { AuthResult, AuthStrategy } from '../types.js';
 
 const ACCESS_TOKEN_PREFIX = 'mcp-token:';
@@ -13,14 +14,9 @@ export interface StoredAccessToken {
   readonly expiresAt: number;
 }
 
-async function hashToken(token: string): Promise<string> {
-  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token));
-  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('');
-}
-
 /** Key under which an access token's grant record is stored. Exported for the issuer/tests. */
 export async function accessTokenKey(token: string): Promise<string> {
-  return `${ACCESS_TOKEN_PREFIX}${await hashToken(token)}`;
+  return `${ACCESS_TOKEN_PREFIX}${await sha256Hex(token)}`;
 }
 
 /**

@@ -1,11 +1,12 @@
 import { Hono, type Context } from 'hono';
 import { cors } from 'hono/cors';
 import { StreamableHTTPTransport } from '@hono/mcp';
-import { HEALTH_ENDPOINT_PATH, MCP_ENDPOINT_PATH } from '@adi-mcp/shared';
+import { HEALTH_ENDPOINT_PATH, MCP_ENDPOINT_PATH, OAUTH_ENDPOINT_PATHS } from '@adi-mcp/shared';
 import type { ProviderRegistry } from '@adi-mcp/core';
 import { buildExecutionContext, type AppBindings } from './context.js';
 import { createMcpServer, SERVER_INFO } from './mcp-server.js';
 import { createProviderRegistry } from './providers.js';
+import { createOAuthRoutes, mountAuthorizationServerMetadata } from './routes/oauth.js';
 import { createProviderRoutes } from './routes/providers.js';
 import { requireAuth } from './middleware/auth.js';
 import { rateLimit } from './middleware/rate-limit.js';
@@ -62,7 +63,7 @@ export function createApp(registry: ProviderRegistry = createProviderRegistry())
   );
 
   // Advertises how to authenticate, per RFC 9728. MCP clients fetch this after a 401.
-  app.get('/.well-known/oauth-protected-resource', (c) => {
+  app.get(OAUTH_ENDPOINT_PATHS.protectedResourceMetadata, (c) => {
     const origin = new URL(c.req.url).origin;
     return c.json({
       resource: `${origin}${MCP_ENDPOINT_PATH}`,
@@ -71,6 +72,11 @@ export function createApp(registry: ProviderRegistry = createProviderRegistry())
       bearer_methods_supported: ['header'],
     });
   });
+
+  // The authorization server the document above points at (RFC 8414 + RFC 7591). Active only
+  // under AUTH_STRATEGY=oauth2; see routes/oauth.ts.
+  mountAuthorizationServerMetadata(app);
+  app.route('/', createOAuthRoutes());
 
   app.route('/providers', createProviderRoutes(registry));
 

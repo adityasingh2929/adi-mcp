@@ -24,7 +24,7 @@
   // with `wrangler secret put <NAME>` and must never be committed here.
   "vars": {
     "LOG_LEVEL": "info",
-    "AUTH_STRATEGY": "bearer",
+    "AUTH_STRATEGY": "oauth2",
     "RATE_LIMIT_MAX_REQUESTS": "60",
     "RATE_LIMIT_WINDOW_SECONDS": "60",
     "CORS_ALLOWED_ORIGINS": "https://claude.ai",
@@ -35,7 +35,7 @@
       "name": "adi-mcp-staging",
       "vars": {
         "LOG_LEVEL": "debug",
-        "AUTH_STRATEGY": "bearer",
+        "AUTH_STRATEGY": "oauth2",
         "RATE_LIMIT_MAX_REQUESTS": "60",
         "RATE_LIMIT_WINDOW_SECONDS": "60",
         "CORS_ALLOWED_ORIGINS": "*",

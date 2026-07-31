@@ -98,9 +98,70 @@ And that endpoint (RFC 9728) is public:
 ```
 
 A compliant client that gets a 401 can follow the header and learn how to authenticate rather
-than just failing. Note that under `bearer` the advertised `authorization_servers` has nothing
-to serve — the metadata is honest about the shape, not a promise that a full OAuth server is
-running.
+than just failing.
+
+Under `bearer` the advertised `authorization_servers` has nothing to serve — the metadata is
+honest about the shape, not a promise that a full OAuth server is running. Under `oauth2` the
+server *is* that authorization server; see below.
+
+### The built-in authorization server
+
+`AUTH_STRATEGY=oauth2` turns on this server's own OAuth 2.1 authorization server, which is
+what a client like Claude Desktop drives when you paste in the `/mcp` URL. It is what mints
+the tokens `OAuthAuthStrategy` verifies. Under `bearer` every endpoint below returns 404, so a
+client can never obtain a token that `/mcp` would then reject.
+
+Its metadata document (RFC 8414) is public and is served both at the bare well-known path and
+at the path-suffixed variant clients probe when the resource lives under `/mcp`:
+
+```bash
+curl https://<host>/.well-known/oauth-authorization-server
+curl https://<host>/.well-known/oauth-authorization-server/mcp
+```
+
+```json
+{
+  "issuer": "https://<host>",
+  "authorization_endpoint": "https://<host>/oauth/authorize",
+  "token_endpoint": "https://<host>/oauth/token",
+  "registration_endpoint": "https://<host>/oauth/register",
+  "revocation_endpoint": "https://<host>/oauth/revoke",
+  "scopes_supported": ["mcp:full"],
+  "response_types_supported": ["code"],
+  "response_modes_supported": ["query"],
+  "grant_types_supported": ["authorization_code", "refresh_token"],
+  "token_endpoint_auth_methods_supported": ["none"],
+  "revocation_endpoint_auth_methods_supported": ["none"],
+  "code_challenge_methods_supported": ["S256"],
+  "resource_indicators_supported": true
+}
+```
+
+The flow, end to end:
+
+```
+POST /oauth/register     RFC 7591 dynamic client registration. Public client, no secret
+                         issued — PKCE is what binds the code to the client. This is the
+                         step behind "Couldn't register with adi-mcp's sign-in service"
+                         when the metadata document is missing.
+GET  /oauth/authorize    Validates client_id, an exactly-matching registered redirect_uri,
+                         response_type=code, an S256 code_challenge, and the RFC 8707
+                         `resource`. Renders the consent page.
+POST /oauth/authorize    You paste the deployment's MCP_BEARER_TOKEN to prove you own the
+                         server, and the request redirects back with a 120s single-use code.
+POST /oauth/token        authorization_code (with code_verifier) or refresh_token. Access
+                         tokens last an hour; refresh tokens rotate on every use.
+POST /oauth/revoke       RFC 7009. Revoking an unknown token is a success, by spec.
+```
+
+Because the deployment is single-tenant, consent is gated on the `MCP_BEARER_TOKEN` secret
+rather than on a user database: whoever can produce that secret owns the server, and every
+grant is issued to `userId: "default"`. If `MCP_BEARER_TOKEN` is unset the consent endpoint
+fails closed with a 500 rather than approving — otherwise anyone reaching the URL would get
+full access to every connected account.
+
+Tokens and authorization codes are stored in KV under their SHA-256, so a KV dump alone
+cannot be replayed against the server.
 
 ---
 

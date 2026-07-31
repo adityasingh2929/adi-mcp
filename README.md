@@ -90,6 +90,11 @@ Point any MCP client at `https://<your-worker>.workers.dev/mcp` with an
 `Authorization: Bearer <MCP_BEARER_TOKEN>` header. The server advertises its auth scheme at
 `/.well-known/oauth-protected-resource` so compliant clients can discover it after a 401.
 
+For clients that sign in rather than take a pasted token — Claude Desktop, Claude on the web —
+set `AUTH_STRATEGY=oauth2`. That turns on the built-in OAuth 2.1 authorization server
+(`/.well-known/oauth-authorization-server`, dynamic client registration, PKCE), so the client
+can register and complete a sign-in flow on its own. See [docs/OAUTH.md](docs/OAUTH.md).
+
 Provider credentials are separate from that token — connect each service once via
 `/providers/<id>/connect`. See [docs/OAUTH.md](docs/OAUTH.md).
 
