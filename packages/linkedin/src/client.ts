@@ -7,9 +7,9 @@ import {
 import { CredentialStore } from '@adi-mcp/auth';
 import {
   LINKEDIN_API_BASE_URL,
-  LINKEDIN_API_VERSION,
   LINKEDIN_PROVIDER_ID,
   createLinkedInCredentialProvider,
+  linkedInApiVersion,
 } from './config.js';
 
 interface LinkedInErrorBody {
@@ -56,7 +56,7 @@ export class LinkedInClient {
         // Opts into LinkedIn's modern protocol; without it the API returns legacy-encoded
         // payloads that don't match the documented JSON shapes.
         'X-Restli-Protocol-Version': '2.0.0',
-        ...(options.versioned ? { 'LinkedIn-Version': LINKEDIN_API_VERSION } : {}),
+        ...(options.versioned ? { 'LinkedIn-Version': linkedInApiVersion(this.ctx.env) } : {}),
       },
       ...(options.body === undefined ? {} : { body: JSON.stringify(options.body) }),
     });

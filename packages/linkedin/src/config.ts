@@ -11,8 +11,19 @@ export const LINKEDIN_API_BASE_URL = 'https://api.linkedin.com';
  */
 export const LINKEDIN_SCOPES = ['openid', 'profile', 'email', 'w_member_social'] as const;
 
-/** LinkedIn requires this header on every versioned REST call; it must be a valid YYYYMM. */
-export const LINKEDIN_API_VERSION = '202506';
+/**
+ * LinkedIn requires this header on every versioned REST call, as a `YYYYMM` string.
+ *
+ * LinkedIn retires a version roughly a year after release, and a stale one fails the entire
+ * call with HTTP 426 — `Requested version <YYYYMM>01 is not active`. Because that expiry is a
+ * wall-clock event rather than anything in this codebase, the value is overridable through
+ * `LINKEDIN_API_VERSION` so it can be bumped without a code change.
+ */
+export const DEFAULT_LINKEDIN_API_VERSION = '202606';
+
+export function linkedInApiVersion(env: Env): string {
+  return env.LINKEDIN_API_VERSION ?? DEFAULT_LINKEDIN_API_VERSION;
+}
 
 export function buildLinkedInOAuthConfig(env: Env): OAuth2Config {
   return {

@@ -7,7 +7,8 @@ import { sharePostTool } from './tools/share-post.js';
 export {
   LINKEDIN_PROVIDER_ID,
   LINKEDIN_SCOPES,
-  LINKEDIN_API_VERSION,
+  DEFAULT_LINKEDIN_API_VERSION,
+  linkedInApiVersion,
   buildLinkedInOAuthConfig,
   createLinkedInCredentialProvider,
 } from './config.js';

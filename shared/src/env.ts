@@ -30,6 +30,8 @@ export interface Env {
   readonly LINKEDIN_CLIENT_ID?: string;
   readonly LINKEDIN_CLIENT_SECRET?: string;
   readonly LINKEDIN_REDIRECT_URI?: string;
+  /** `YYYYMM` override for the LinkedIn-Version header; see DEFAULT_LINKEDIN_API_VERSION. */
+  readonly LINKEDIN_API_VERSION?: string;
 
   // ── GitHub ──
   readonly GITHUB_CLIENT_ID?: string;
